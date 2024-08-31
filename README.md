@@ -46,7 +46,10 @@ The project directory contains the following files:
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/pos-management-system.git
+   git clone git remote add origin https://github.com/ZakiDhiblawe/POS-Management-System-.git
+     ```
+
+ ```bash
    cd pos-management-system
    ```
 
