@@ -1,0 +1,125 @@
+-- Create Sequences
+CREATE SEQUENCE seq_product_id1
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE;
+
+CREATE SEQUENCE seq_order_id1
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE;
+
+CREATE SEQUENCE seq_order_detail_id1
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE;
+
+-- Create Tables with Modified Names
+CREATE TABLE Product1 (
+    ProductID NUMBER PRIMARY KEY,
+    ProductName VARCHAR2(100) NOT NULL,
+    CategoryID NUMBER,
+    Price NUMBER(10, 2) NOT NULL,
+    StockLevel NUMBER NOT NULL
+);
+
+CREATE TABLE Category1 (
+    CategoryID NUMBER PRIMARY KEY,
+    CategoryName VARCHAR2(50) NOT NULL
+);
+
+CREATE TABLE Customer1 (
+    CustomerID NUMBER PRIMARY KEY,
+    CustomerName VARCHAR2(100) NOT NULL,
+    ContactNumber VARCHAR2(15),
+    Email VARCHAR2(100)
+);
+
+CREATE TABLE Orders1 (
+    OrderID NUMBER PRIMARY KEY,
+    OrderDate DATE NOT NULL,
+    CustomerID NUMBER,
+    TotalAmount NUMBER(10, 2),
+    FOREIGN KEY (CustomerID) REFERENCES Customer1(CustomerID)
+);
+
+CREATE TABLE OrderDetail1 (
+    OrderDetailID NUMBER PRIMARY KEY,
+    OrderID NUMBER,
+    ProductID NUMBER,
+    Quantity NUMBER,
+    UnitPrice NUMBER(10, 2),
+    TotalPrice NUMBER(10, 2),
+    FOREIGN KEY (OrderID) REFERENCES Orders1(OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Product1(ProductID)
+);
+
+-- Create Views with Modified Names
+CREATE VIEW SalesReport1 AS
+SELECT o.OrderID, o.OrderDate, c.CustomerName, SUM(od.TotalPrice) AS TotalAmount
+FROM Orders1 o
+JOIN Customer1 c ON o.CustomerID = c.CustomerID
+JOIN OrderDetail1 od ON o.OrderID = od.OrderID
+GROUP BY o.OrderID, o.OrderDate, c.CustomerName;
+
+CREATE VIEW InventoryReport1 AS
+SELECT p.ProductID, p.ProductName, p.StockLevel, c.CategoryName
+FROM Product1 p
+JOIN Category1 c ON p.CategoryID = c.CategoryID;
+
+-- Create Triggers with Modified Names
+CREATE OR REPLACE TRIGGER trg_update_stock1
+AFTER INSERT ON OrderDetail1
+FOR EACH ROW
+BEGIN
+    UPDATE Product1
+    SET StockLevel = StockLevel - :NEW.Quantity
+    WHERE ProductID = :NEW.ProductID;
+END;
+/
+
+-- Create Procedures with Modified Names
+CREATE OR REPLACE PROCEDURE add_product1(
+    p_ProductName IN VARCHAR2,
+    p_CategoryID IN NUMBER,
+    p_Price IN NUMBER,
+    p_StockLevel IN NUMBER
+) IS
+BEGIN
+    INSERT INTO Product1 (ProductID, ProductName, CategoryID, Price, StockLevel)
+    VALUES (seq_product_id1.NEXTVAL, p_ProductName, p_CategoryID, p_Price, p_StockLevel);
+END;
+/
+
+ALTER TABLE Customer1 ADD (
+    Username VARCHAR2(50) UNIQUE NOT NULL,
+    Password VARCHAR2(100) NOT NULL
+);
+
+CREATE SEQUENCE Customer1_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE;
+
+
+insert into Category1 (CategoryID, CategoryName) values (1, 'cunto');
+insert into Category1 (CategoryID, CategoryName) values (2, 'dhar');
+insert into Category1 (CategoryID, CategoryName) values (3, 'electronic');
+
+
+CREATE OR REPLACE PROCEDURE add_product(
+    p_ProductName IN VARCHAR2,
+    p_CategoryID IN NUMBER,
+    p_Price IN NUMBER,
+    p_StockLevel IN NUMBER
+) IS
+BEGIN
+    INSERT INTO Product1 (ProductID, ProductName, CategoryID, Price, StockLevel)
+    VALUES (seq_product_id1.NEXTVAL, p_ProductName, p_CategoryID, p_Price, p_StockLevel);
+END;
+/
+
+
+
+
+
